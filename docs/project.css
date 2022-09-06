@@ -1,0 +1,157 @@
+:root {
+    --primary-color: rgb(23, 24, 34);
+    --secondary-color: rgb(40, 45, 63);
+    --menu-bar-height: 50px;
+    --primary-font: 24px "Roboto Bold";
+    --primary-text-color: rgb(188, 189, 208);
+    --secondary-text-color: rgb(130, 129, 146);
+}
+
+@font-face {
+    font-family: "Roboto Thin";
+    src: url("fonts/roboto/Roboto-Thin.ttf");
+}
+
+@font-face {
+    font-family: "Roboto Bold";
+    src: url("fonts/roboto/Roboto-Bold.ttf");
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+    .sidebar {
+        padding-top: 15px;
+    }
+
+    .sidebar a {
+        font-size: 18px;
+    }
+}
+
+body {
+    background-color: var(--primary-color);
+    font: var(--primary-font);
+    color: var(--primary-text-color);
+}
+
+/* The sidebar menu */
+.sidebar {
+    height: 100%; /* 100% Full-height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0;
+    left: 0;
+    background-color: var(--secondary-color); /* Black*/
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 60px; /* Place content 60px from the top */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidebar */
+}
+
+/* The sidebar links */
+.sidebar a, ul {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+/* Position and style the close button (top right corner) */
+.sidebar .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+/* The button used to open the sidebar */
+.openbtn {
+    font-size: 20px;
+    cursor: pointer;
+    background-color: transparent;
+    color: var(--secondary-text-color);
+    padding: 10px 15px;
+    border: none;
+}
+.openbtn:hover {
+    color: var(--primary-text-color);
+}
+
+/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+#main {
+    transition: margin-left .5s; /* If you want a transition effect */
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom-color: var(--secondary-color);
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+/* Remove default bullets */
+ul, #myUL {
+    list-style-type: none;
+}
+
+/* Remove margins and padding from the parent ul */
+#myUL {
+    margin: 0;
+    padding: 0;
+}
+
+/* Style the caret/arrow */
+.caret {
+    cursor: pointer;
+    user-select: none; /* Prevent text selection */
+}
+
+/* Create the caret/arrow with a unicode, and style it */
+.caret::before {
+    content: "\25B6";
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+/* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+.caret-down::before {
+    transform: rotate(90deg);
+}
+
+/* Hide the nested list */
+.nested {
+    display: none;
+}
+
+/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+.active {
+    display: block;
+}
+
+.menu-title {
+    display: inline-block;
+    font-weight: 200;
+    font-size: 2rem;
+    line-height: var(--menu-bar-height);
+    text-align: center;
+    margin: 0;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hover-effect {
+    transition: 0.6s;
+}
+
+.hover-effect:hover {
+    color: #f1f1f1;
+}
+
+text {
+    color: var(--primary-text-color) !important;
+}
