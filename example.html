@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Rounding All The Corners With OpenGL</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            color: #ffffff;
+            background-color: #000000;
+            margin: 0px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container"></div>
+
+<script src="js/three.js"></script>
+<script src="js/Detector.js"></script>
+
+<script>
+
+    var webGlSupported = Detector.webgl;
+    if (!webGlSupported) {
+        Detector.addGetWebGLMessage();
+    }
+
+    const BRIGHT_GREEN = new THREE.Color(0.0, 1.0, 0.0);
+    const DARK_GREEN = new THREE.Color(0.0, 0.3, 0.0);
+
+    const VERTEX_COLORS = [DARK_GREEN, BRIGHT_GREEN, BRIGHT_GREEN];
+
+    var container = undefined;
+    var camera = undefined;
+    var material = undefined;
+    var scene = undefined;
+    var renderer = undefined;
+
+    initializeCamera();
+    initializeMaterial();
+    initializeScene();
+    initializeRenderer();
+    renderScene();
+
+    function initializeMaterial() {
+        material = new THREE.MeshBasicMaterial({
+            vertexColors: THREE.VertexColors,
+            side: THREE.DoubleSide
+        });
+    }
+
+    function initializeScene() {
+        scene = new THREE.Scene();
+
+        addRegularPolygonToScene(0.0, 75.0);
+        addRoundedRectangleToScene(0.0, 0.0);
+        addRoundedRegularPolygonToScene(0.0, -75.0);
+    }
+
+    function addMeshToScene(geometry, material, x, y) {
+        var mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(x, y, 0.0);
+        scene.add(mesh);
+    }
+
+    ////////////////////////////////////////
+    // Regular Polygon
+    ////////////////////////////////////////
+
+    function addRegularPolygonToScene(x, y) {
+        var radius = 40.0;
+        var sidesCount = 6;
+        var geometry = getRegularPolygonGeometry(radius, sidesCount);
+
+        addMeshToScene(geometry, material, x, y);
+    }
+
+    function getRegularPolygonGeometry(radius, sidesCount) {
+        var geometry = new THREE.Geometry();
+
+        geometry.vertices = getRegularPolygonVertices(radius, sidesCount);
+        geometry.faces = getRadialFaces(sidesCount);
+
+        return geometry;
+    }
+
+    // 1
+    function getRegularPolygonVertices(radius, sidesCount) {
+        var vertices = [];
+
+        var centerPoint = new THREE.Vector3(0.0, 0.0, 0.0);
+        vertices.push(centerPoint);
+
+        for (sideIndex = 0; sideIndex < sidesCount; sideIndex++) {
+            var sideProgress = sideIndex / sidesCount;
+            var point = getRadialPoint(sideProgress, radius);
+            vertices.push(point);
+        }
+
+        return vertices;
+    }
+
+    ////////////////////////////////////////
+    // Rounded Rectangle
+    ////////////////////////////////////////
+
+    function addRoundedRectangleToScene(x, y) {
+        var width = 180.0;
+        var height = 50.0;
+        var roundingRadius = 15.0;
+        var sidesCountPerRounding = 20;
+        var geometry = getRoundedRectangleGeometry(width, height, roundingRadius, sidesCountPerRounding);
+
+        addMeshToScene(geometry, material, x, y);
+    }
+
+    function getRoundedRectangleGeometry(width, height, roundingRadius, sidesCountPerRounding) {
+        var geometry = new THREE.Geometry();
+
+        geometry.vertices = getRoundedRectangleVertices(width, height, roundingRadius, sidesCountPerRounding);
+
+        // 4
+        var cornersCount = 4;
+        var facesCount = sidesCountPerRounding * cornersCount + cornersCount;
+        geometry.faces = getRadialFaces(facesCount);
+
+        return geometry;
+    }
+
+    // 3
+    function getRoundedRectangleVertices(width, height, roundingRadius, sidesCountPerRounding) {
+        var vertices = [];
+
+        var centerPoint = new THREE.Vector3(0.0, 0.0, 0.0);
+        vertices.push(centerPoint);
+
+        var quadrantPositivities = [
+            {x: 1.0, y: 1.0},
+            {x: -1.0, y: 1.0},
+            {x: -1.0, y: -1.0},
+            {x: 1.0, y: -1.0}
+        ];
+
+        var cornersCount = 4;
+
+        for (var cornerIndex = 0; cornerIndex < cornersCount; cornerIndex++) {
+            var startProgress = cornerIndex / cornersCount;
+            var endProgress = (cornerIndex + 1) / cornersCount;
+
+            var quadrantPositivity = quadrantPositivities[cornerIndex];
+
+            var cornerOuterX = quadrantPositivity.x * 0.5 * width;
+            var cornerRoundingCenterX = cornerOuterX - quadrantPositivity.x * roundingRadius;
+
+            var cornerOuterY = quadrantPositivity.y * 0.5 * height;
+            var cornerRoundingCenterY = cornerOuterY - quadrantPositivity.y * roundingRadius;
+
+            var cornerVertices = getRoundingVertices(
+                startProgress,
+                endProgress,
+                roundingRadius,
+                sidesCountPerRounding,
+                cornerRoundingCenterX,
+                cornerRoundingCenterY
+            );
+
+            vertices = vertices.concat(cornerVertices);
+        }
+
+        return vertices;
+    }
+
+    ////////////////////////////////////////
+    // Rounded Regular Polygon
+    ////////////////////////////////////////
+
+    function addRoundedRegularPolygonToScene(x, y) {
+        var radius = 40.0;
+        var roundingRadius = 10.0;
+        var sidesCount = 6;
+        var sidesCountPerRounding = 20;
+        var geometry = getRoundedRegularPolygonGeometry(radius, roundingRadius, sidesCount, sidesCountPerRounding);
+
+        addMeshToScene(geometry, material, x, y);
+    }
+
+    function getRoundedRegularPolygonGeometry(radius, roundingRadius, sidesCount, sidesCountPerRounding) {
+        var geometry = new THREE.Geometry();
+
+        geometry.vertices = getRoundedRegularPolygonVertices(radius, roundingRadius, sidesCount, sidesCountPerRounding);
+
+        var facesCount = sidesCountPerRounding * sidesCount + sidesCount;
+        geometry.faces = getRadialFaces(facesCount);
+
+        return geometry;
+    }
+
+    // 5
+    function getRoundedRegularPolygonVertices(radius, roundingRadius, sidesCount, sidesCountPerRounding) {
+        var vertices = [];
+
+        var centerPoint = new THREE.Vector3(0.0, 0.0, 0.0);
+        vertices.push(centerPoint);
+
+        var roundingCenterRadius = radius - roundingRadius;
+        var progressPerRounding = 1.0 / sidesCount;
+
+        for (sideIndex = 0; sideIndex < sidesCount; sideIndex++) {
+            var roundingCenterProgress = sideIndex / sidesCount;
+            var roundingStartProgress = roundingCenterProgress - 0.5 * progressPerRounding;
+            var roundingEndProgress = roundingCenterProgress + 0.5 * progressPerRounding;
+
+            var roundingCenterPoint = getRadialPoint(roundingCenterProgress, roundingCenterRadius);
+
+            var roundingVertices = getRoundingVertices(
+                roundingStartProgress,
+                roundingEndProgress,
+                roundingRadius,
+                sidesCountPerRounding,
+                roundingCenterPoint.x,
+                roundingCenterPoint.y
+            );
+
+            vertices = vertices.concat(roundingVertices);
+        }
+
+        return vertices;
+    }
+
+    ////////////////////////////////////////
+
+    // 2
+    function getRadialFaces(facesCount) {
+        var faces = [];
+
+        var centerPointIndex = 0;
+
+        for (faceIndex = 0; faceIndex < facesCount; faceIndex++) {
+            var face = new THREE.Face3();
+
+            var trailingOuterPointIndex = faceIndex + 1;
+
+            var leadingOuterPointIndex = faceIndex + 2;
+            if (leadingOuterPointIndex > facesCount) {
+                leadingOuterPointIndex -= facesCount;
+            }
+
+            var normal = undefined;
+            var face = new THREE.Face3(centerPointIndex, trailingOuterPointIndex, leadingOuterPointIndex, normal, VERTEX_COLORS);
+
+            faces.push(face);
+        }
+
+        return faces;
+    }
+
+    function getRoundingVertices(startProgress, endProgress, radius, sidesCount, centerX = 0.0, centerY = 0.0) {
+        var vertices = [];
+
+        var progressRange = endProgress - startProgress;
+
+        for (vertexIndex = 0; vertexIndex <= sidesCount; vertexIndex++) {
+            var vertexProgress = startProgress + progressRange * (vertexIndex / sidesCount);
+
+            var vertex = getRadialPoint(vertexProgress, radius, centerX, centerY);
+            vertices.push(vertex);
+        }
+
+        return vertices;
+    }
+
+    function getRadialPoint(progress, radius, centerX = 0.0, centerY = 0.0) {
+        var angle = progress * 2.0 * Math.PI;
+
+        var x = centerX + Math.cos(angle) * radius;
+        var y = centerY + Math.sin(angle) * radius;
+
+        return new THREE.Vector3(x, y, 0.0);
+    }
+
+    function initializeCamera() {
+        var aspectRatio = window.innerWidth / window.innerHeight;
+        var screenWidth = undefined;
+        var screenHeight = undefined;
+        if (aspectRatio > 1.0) {
+            screenWidth = 320.0 * aspectRatio;
+            screenHeight = 320.0;
+        } else {
+            screenWidth = 320.0;
+            screenHeight = 320.0 / aspectRatio;
+        }
+
+        var nearPlane = 1.0;
+        var farPlane = 1000.0;
+        camera = new THREE.OrthographicCamera(
+            -0.5 * screenWidth,
+            0.5 * screenWidth,
+            0.5 * screenHeight,
+            -0.5 * screenHeight,
+
+            nearPlane,
+            farPlane
+        );
+
+        var distanceFromScene = 500.0;
+        camera.position.set(0.0, 0.0, distanceFromScene);
+    }
+
+    function initializeRenderer() {
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        container = document.getElementById("container");
+        container.appendChild(renderer.domElement);
+    }
+
+    function renderScene() {
+        renderer.render(scene, camera);
+    }
+
+</script>
+
+</body>
+</html>
