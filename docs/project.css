@@ -76,6 +76,7 @@ body {
     padding: 10px 15px;
     border: none;
 }
+
 .openbtn:hover {
     color: var(--primary-text-color);
 }
@@ -131,12 +132,20 @@ ul, #myUL {
     display: block;
 }
 
-.menu-title {
+.centered {
     display: inline-block;
+}
+
+.menu-title a {
+    text-decoration: none;
+    color: var(--primary-text-color);
+}
+
+.menu-title {
+    text-align: center;
     font-weight: 200;
     font-size: 2rem;
     line-height: var(--menu-bar-height);
-    text-align: center;
     margin: 0;
     flex: 1;
     white-space: nowrap;
@@ -152,6 +161,7 @@ ul, #myUL {
     color: #f1f1f1;
 }
 
-text {
-    color: var(--primary-text-color) !important;
+
+h1, h2, h3, h4, h5, p {
+    text-align: center;
 }
