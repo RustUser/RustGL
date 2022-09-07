@@ -161,7 +161,36 @@ ul, #myUL {
     color: #f1f1f1;
 }
 
+#dependencies {
+    text-align: center;
+    width: 80%;
+    border: var(--secondary-text-color) 1px solid;
+    margin-left: 10%;
+}
+
+#dependencies_desc {
+    background-color: #3d4561;
+    width: fit-content;
+}
+
+#dependencies_library {
+    width: 30%;
+}
+
+#dependencies_usage {
+    width: 50%
+}
 
 h1, h2, h3, h4, h5, p {
     text-align: center;
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.tr_1 {
+    background-color: rgb(22, 25, 35);
+}
+
+.tr_2 {
+    background-color: #1b1f2c;
 }

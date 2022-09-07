@@ -1,5 +1,4 @@
 
-use clipboard::*;
 use imgui::{ClipboardBackend, ImStr, ImString};
 
 pub struct ClipboardSupport(pub ClipboardContext);
